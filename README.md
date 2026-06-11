@@ -26,3 +26,4 @@ Gewartet via Hermes Agent (KI-Assistent).
 
 Deployment via GitHub Actions eingerichtet.
 Thu Jun 11 12:25:44 UTC 2026
+Thu Jun 11 12:33:06 UTC 2026
