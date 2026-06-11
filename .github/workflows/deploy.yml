@@ -7,30 +7,31 @@ name: Deploy to Hostinger
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # Manueller Trigger im GitHub-UI
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: SSH-Key einrichten
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H srv1650992.hstgr.cloud >> ~/.ssh/known_hosts
+
       - name: Git pull auf dem Server
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: srv1650992.hstgr.cloud
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new root@srv1650992.hstgr.cloud "
             cd /var/www/creativ-gruen.de
             git pull
-            echo "Deploy: $(git log -1 --oneline)"
-          
+            echo \"Deploy: \$(git log -1 --oneline)\"
+          "
+
       - name: nginx reload (nur bei Config-Änderung)
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: srv1650992.hstgr.cloud
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+        run: |
+          ssh -i ~/.ssh/deploy_key root@srv1650992.hstgr.cloud "
             if [ -f /etc/nginx/sites-enabled/creativ-gruen.de ]; then
               nginx -t && systemctl reload nginx
             fi
+          "
