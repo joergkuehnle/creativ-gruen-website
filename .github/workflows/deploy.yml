@@ -1,0 +1,36 @@
+# .github/workflows/deploy.yml
+# In das Repo joergkuehnle/creativ-gruen-website legen
+# Trigger: Push auf main → deployt automatisch auf Hostinger VPS
+
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Manueller Trigger im GitHub-UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git pull auf dem Server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: srv1650992.hstgr.cloud
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/creativ-gruen.de
+            git pull
+            echo "Deploy: $(git log -1 --oneline)"
+          
+      - name: nginx reload (nur bei Config-Änderung)
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: srv1650992.hstgr.cloud
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            if [ -f /etc/nginx/sites-enabled/creativ-gruen.de ]; then
+              nginx -t && systemctl reload nginx
+            fi
