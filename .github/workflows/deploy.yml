@@ -16,9 +16,11 @@ jobs:
       - name: SSH-Key einrichten
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          cat > ~/.ssh/deploy_key << 'SSHKEY'
+          ${{ secrets.SSH_PRIVATE_KEY }}
+          SSHKEY
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H srv1650992.hstgr.cloud >> ~/.ssh/known_hosts
+          ssh-keyscan -H srv1650992.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Git pull auf dem Server
         run: |
