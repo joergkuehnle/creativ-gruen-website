@@ -22,18 +22,9 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H srv1650992.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Git pull auf dem Server
+      - name: Git pull und nginx reload auf dem Server
+        env:
+          DEPLOY_CMD: |
+            cd /var/www/creativ-gruen.de && git pull && echo "OK: $(git log -1 --oneline)" && nginx -t && systemctl reload nginx
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new root@srv1650992.hstgr.cloud "
-            cd /var/www/creativ-gruen.de
-            git pull
-            echo \"Deploy: \$(git log -1 --oneline)\"
-          "
-
-      - name: nginx reload (nur bei Config-Änderung)
-        run: |
-          ssh -i ~/.ssh/deploy_key root@srv1650992.hstgr.cloud "
-            if [ -f /etc/nginx/sites-enabled/creativ-gruen.de ]; then
-              nginx -t && systemctl reload nginx
-            fi
-          "
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new root@srv1650992.hstgr.cloud "$DEPLOY_CMD"
