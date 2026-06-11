@@ -23,3 +23,5 @@ Gehostet auf Hostinger VPS mit nginx.
 ## Wartung
 
 Gewartet via Hermes Agent (KI-Assistent).
+
+Deployment via GitHub Actions eingerichtet.
